@@ -118,6 +118,50 @@ export function PhasionAIPanel() {
     }
   };
 
+  // Render message content with beautiful markdown link parser and paragraph formatting
+  const renderMessageContent = (content: string) => {
+    const lines = content.split("\n");
+    
+    return lines.map((line, lineIdx) => {
+      const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+      const parts = [];
+      let lastIndex = 0;
+      let match;
+
+      while ((match = linkRegex.exec(line)) !== null) {
+        const matchIndex = match.index;
+        if (matchIndex > lastIndex) {
+          parts.push(line.substring(lastIndex, matchIndex));
+        }
+
+        const linkText = match[1];
+        const linkUrl = match[2];
+
+        parts.push(
+          <Link
+            key={`${lineIdx}-${matchIndex}`}
+            href={linkUrl}
+            className="text-[var(--color-amber)] hover:text-[#d18309] font-bold underline decoration-dotted transition-colors"
+          >
+            {linkText}
+          </Link>
+        );
+
+        lastIndex = linkRegex.lastIndex;
+      }
+
+      if (lastIndex < line.length) {
+        parts.push(line.substring(lastIndex));
+      }
+
+      return (
+        <span key={lineIdx} className="block min-h-[1.25em] text-pretty">
+          {parts.length > 0 ? parts : line}
+        </span>
+      );
+    });
+  };
+
   return (
     <>
       {/* TRIGGER BUTTON WITH CUSTOM LOGO */}
@@ -161,31 +205,62 @@ export function PhasionAIPanel() {
             {messages.map((msg, idx) => (
               <div key={idx} className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[85%] p-4 shadow-sm ${msg.role === 'user' ? 'bg-[var(--color-espresso)] text-[var(--color-ivory)]' : 'bg-white text-[var(--color-stone)] border border-[var(--color-parchment)]'}`}>
-                  <p className="font-sans text-sm leading-relaxed whitespace-pre-line text-pretty">{msg.content}</p>
                   
-                  {/* MULTI-PRODUCT RECOMMENDATION CARDS */}
+                  {/* Message body with Markdown support */}
+                  <div className="font-sans text-sm leading-relaxed space-y-1 text-pretty">
+                    {renderMessageContent(msg.content)}
+                  </div>
+                  
+                  {/* MULTI-PRODUCT RECOMMENDATION CARDS (HIGH-DENSITY HIGH-FASHION PORTRAIT LOOKS) */}
                   {msg.products && msg.products.length > 0 && (
-                    <div className="mt-4 flex flex-col gap-2.5">
+                    <div className="mt-4 flex flex-col gap-3">
                       {msg.products.map((item) => {
                         const img = resolveApiImageUrl(item.image_urls?.[0]);
                         return (
-                          <div key={item.id} className="flex gap-3 border border-[var(--color-parchment)] p-2 bg-white hover:border-[var(--color-amber)] transition-colors relative">
-                            <Link href={`/shop/${item.id}`} className="relative w-11 h-14 bg-[var(--color-parchment)] flex-shrink-0 block">
-                              {img && <Image src={img} alt={item.name} fill className="object-cover" />}
+                          <div key={item.id} className="flex gap-4 border border-[var(--color-parchment)] p-2.5 bg-white hover:border-[var(--color-amber)] shadow-sm transition-all duration-300 relative group/card">
+                            
+                            {/* Larger high-quality portrait image */}
+                            <Link href={`/shop/${item.id}`} className="relative w-20 h-28 bg-[var(--color-parchment)] flex-shrink-0 block overflow-hidden">
+                              {img && (
+                                <Image 
+                                  src={img} 
+                                  alt={item.name} 
+                                  fill 
+                                  className="object-cover transition-transform duration-500 group-hover/card:scale-105" 
+                                />
+                              )}
                             </Link>
-                            <div className="flex flex-col justify-between py-0.5 flex-1 min-w-0">
+                            
+                            {/* Product Info and Styled Action buttons */}
+                            <div className="flex flex-col justify-between py-1 flex-1 min-w-0">
                               <div>
+                                <span className="font-sans text-[8px] tracking-widest uppercase font-bold text-[var(--color-stone)] block mb-0.5">Editorial Selection</span>
                                 <Link href={`/shop/${item.id}`}>
-                                  <h5 className="font-serif text-[var(--color-espresso)] text-xs font-bold leading-tight line-clamp-1 hover:underline">{item.name}</h5>
+                                  <h5 className="font-serif text-[var(--color-espresso)] text-sm font-bold leading-snug line-clamp-2 hover:underline">{item.name}</h5>
                                 </Link>
-                                <p className="font-sans text-[var(--color-amber)] uppercase text-[10px] tracking-widest mt-0.5">{formatGhanaCediCompact(item.price_minor)}</p>
+                                <p className="font-sans text-[var(--color-amber)] uppercase text-xs tracking-widest mt-1.5 font-bold">{formatGhanaCediCompact(item.price_minor)}</p>
                               </div>
-                              <button 
-                                onClick={() => addItem(item)}
-                                className="self-start text-[10px] font-sans uppercase font-bold text-[var(--color-espresso)] hover:text-[var(--color-amber)] transition-colors tracking-widest mt-1"
-                              >
-                                ADD TO CART
-                              </button>
+                              
+                              <div className="flex items-center gap-3.5 mt-2.5">
+                                <button 
+                                  onClick={() => addItem(item)}
+                                  className="text-[10px] font-sans uppercase font-bold text-[var(--color-espresso)] hover:text-[var(--color-amber)] transition-colors tracking-widest flex items-center gap-1.5"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                                  </svg>
+                                  Add
+                                </button>
+                                <Link 
+                                  href={`/shop/${item.id}`}
+                                  className="text-[10px] font-sans uppercase font-bold text-[var(--color-stone)] hover:text-[var(--color-amber)] transition-colors tracking-widest flex items-center gap-0.5"
+                                >
+                                  Details
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3 h-3">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                  </svg>
+                                </Link>
+                              </div>
                             </div>
                           </div>
                         );

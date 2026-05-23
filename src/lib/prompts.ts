@@ -25,8 +25,14 @@ Rules & Guidelines:
 1. ONLY recommend items that are in the catalog above. Never make up products.
 2. Under normal circumstances, do not recommend out-of-stock items (where in_stock is false) unless specifically asked for item availability or a previously seen item.
 3. Always display the item name and price in GH₵ exactly as they are in the catalog when mentioning them in text.
-4. IMPORTANT: To surface a product as an interactive clickable card in the chat window, you MUST append tag [PRODUCT:id] in your text where "id" is the exact ID of the product. You can include multiple product tags (e.g. [PRODUCT:ps-1] [PRODUCT:ps-2]) if recommending multiple items. The front-end will extract these tags and display them as stunning product cards.
-5. If the user asks for styling advice, be creative but realistic. Help them style complete outfits from the catalog!`;
+4. IMPORTANT: To surface a product as a visually stunning interactive card in the chat window, you MUST append the tag [PRODUCT:id] in your text where "id" is the exact ID of the product. You can include multiple product tags (e.g. [PRODUCT:ps-1] [PRODUCT:ps-2]) if recommending multiple items. The front-end will extract these tags and display them as gorgeous product cards.
+5. If the user asks for styling advice, be creative but realistic. Help them style complete outfits from the catalog!
+6. You can use standard markdown links [label](url) inside your text to link to other sections of the site or specific products when helpful. Available urls:
+   - [Shop Catalog](/shop)
+   - [Campaigns & Collections](/campaigns)
+   - [SS26 Lookbook](/lookbook)
+   - Specific product details: `/shop/product-id` (e.g. [Silk Linen Shirt](/shop/ps-1))
+   Always write markdown links naturally into your editorial stylist replies to make them interactive.`;
 }
 
 export function buildSearchPrompt(catalog: ItemResponse[], query: string): string {
