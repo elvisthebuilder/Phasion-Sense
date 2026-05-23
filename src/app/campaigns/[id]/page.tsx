@@ -76,16 +76,6 @@ export default async function CampaignDetailPage({ params }: Props) {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
 
-        {/* Breadcrumb */}
-        <div className="absolute top-28 left-8 z-10">
-          <Link
-            href="/campaigns"
-            className="font-sans text-white/60 hover:text-white text-xs uppercase tracking-widest transition-colors"
-          >
-            ← All Campaigns
-          </Link>
-        </div>
-
         {/* Hero Content */}
         <div className="absolute bottom-16 left-8 right-8 z-10 max-w-4xl">
           <span className="font-sans text-[var(--color-amber)] uppercase tracking-widest text-xs mb-4 block">
@@ -102,6 +92,18 @@ export default async function CampaignDetailPage({ params }: Props) {
               {campaign.copy_text}
             </p>
           )}
+        </div>
+      </section>
+
+      {/* BREADCRUMB STRIP */}
+      <section className="w-full bg-[var(--color-cream)] px-8 py-6 border-b border-[var(--color-parchment)]">
+        <div className="max-w-[1400px] mx-auto">
+          <Link
+            href="/campaigns"
+            className="inline-flex items-center gap-2 font-sans text-[var(--color-stone)] hover:text-[var(--color-espresso)] text-xs uppercase tracking-widest transition-colors"
+          >
+            <span className="text-lg leading-none mb-[2px]">←</span> All Campaigns
+          </Link>
         </div>
       </section>
 
