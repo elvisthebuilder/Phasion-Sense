@@ -1,35 +1,81 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import { useCartStore } from "@/stores/cart-store";
+import { resolveApiImageUrl } from "@/lib/image";
+import { formatGhanaCediCompact } from "@/lib/format";
+import { pickCompleteTheLook } from "@/lib/recommendations";
+import { getMerchantItems, type ItemResponse } from "@/lib/commerce";
+
+type MessageProduct = {
+  item: ItemResponse;
+};
+
+type Message = {
+  role: "ai" | "user";
+  content: string;
+  product?: MessageProduct;
+};
 
 export function PhasionAIPanel() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState([
+  const [catalog, setCatalog] = useState<ItemResponse[]>([]);
+  const addItem = useCartStore((s: ReturnType<typeof useCartStore.getState>) => s.addItem);
+  const [messages, setMessages] = useState<Message[]>([
     {
       role: "ai",
       content: "Hello. I'm here to help you find exactly what you're looking for — whether it's a specific piece, a full look, or just something that feels right. What do you have in mind?"
     }
   ]);
 
+  // Load catalog once when panel opens
+  useEffect(() => {
+    if (isOpen && catalog.length === 0) {
+      getMerchantItems()
+        .then(setCatalog)
+        .catch(() => {});
+    }
+  }, [isOpen, catalog.length]);
+
   const handleSend = (text: string) => {
     if (!text.trim()) return;
     setMessages(prev => [...prev, { role: "user", content: text }]);
     setInput("");
     
-    // Simulate AI typing delay
+    // Simple keyword-based recommendation from real catalog
     setTimeout(() => {
-      setMessages(prev => [...prev, { 
-        role: "ai", 
-        content: "I recommend the Ivory Silk Blouse. It has an architectural drape that works perfectly for formal settings while maintaining a relaxed edge.",
-        product: {
-          name: "Ivory Silk Blouse",
-          price: "GH₵ 650",
-          img: "https://images.unsplash.com/photo-1598554747436-c9293d6a588f?w=200&q=80"
-        }
-      }]);
-    }, 1500);
+      const lowerText = text.toLowerCase();
+      
+      // Find matching items by keyword
+      let recommendations = catalog.filter((item) => {
+        const itemText = `${item.name} ${item.description ?? ""}`.toLowerCase();
+        return lowerText.split(/\s+/).some(word => word.length > 3 && itemText.includes(word));
+      });
+
+      // If no keyword match, pick a random in-stock item
+      if (recommendations.length === 0) {
+        recommendations = catalog.filter((item) => item.in_stock);
+      }
+
+      const pick = recommendations[0];
+      if (pick) {
+        const related = pickCompleteTheLook(pick, catalog);
+        const relatedNames = related.map((r) => r.name).join(", ");
+        
+        setMessages(prev => [...prev, { 
+          role: "ai", 
+          content: `I recommend the ${pick.name} at ${formatGhanaCediCompact(pick.price_minor)}. ${pick.description ?? ""} ${related.length > 0 ? `\n\nPair it with: ${relatedNames}.` : ""}`,
+          product: { item: pick }
+        }]);
+      } else {
+        setMessages(prev => [...prev, {
+          role: "ai",
+          content: "I don't have any matching pieces right now. Try asking about styles, occasions, or specific garment types."
+        }]);
+      }
+    }, 800);
   };
 
   return (
@@ -76,24 +122,30 @@ export function PhasionAIPanel() {
             {messages.map((msg, idx) => (
               <div key={idx} className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[85%] p-4 ${msg.role === 'user' ? 'bg-[var(--color-espresso)] text-[var(--color-ivory)]' : 'bg-white text-[var(--color-stone)] border border-[var(--color-parchment)]'}`}>
-                  <p className="font-sans text-sm leading-relaxed">{msg.content}</p>
+                  <p className="font-sans text-sm leading-relaxed whitespace-pre-line">{msg.content}</p>
                   
-                  {msg.product && (
-                    <div className="mt-4 flex gap-3 border border-[var(--color-parchment)] p-2 bg-white">
-                      <div className="relative w-11 h-14 bg-[var(--color-parchment)] flex-shrink-0">
-                        <Image src={msg.product.img} alt={msg.product.name} fill className="object-cover" />
-                      </div>
-                      <div className="flex flex-col justify-between py-1 flex-1">
-                        <div>
-                          <h5 className="font-serif text-[var(--color-espresso)] text-xs font-bold leading-tight line-clamp-1">{msg.product.name}</h5>
-                          <p className="font-sans text-[var(--color-amber)] uppercase text-[10px] tracking-widest">{msg.product.price}</p>
+                  {msg.product && (() => {
+                    const img = resolveApiImageUrl(msg.product.item.image_urls?.[0]);
+                    return (
+                      <div className="mt-4 flex gap-3 border border-[var(--color-parchment)] p-2 bg-white">
+                        <div className="relative w-11 h-14 bg-[var(--color-parchment)] flex-shrink-0">
+                          {img && <Image src={img} alt={msg.product.item.name} fill className="object-cover" />}
                         </div>
-                        <button className="self-start text-[10px] font-sans uppercase font-bold text-[var(--color-amber)] hover:underline tracking-widest">
-                          ADD TO CART
-                        </button>
+                        <div className="flex flex-col justify-between py-1 flex-1">
+                          <div>
+                            <h5 className="font-serif text-[var(--color-espresso)] text-xs font-bold leading-tight line-clamp-1">{msg.product.item.name}</h5>
+                            <p className="font-sans text-[var(--color-amber)] uppercase text-[10px] tracking-widest">{formatGhanaCediCompact(msg.product.item.price_minor)}</p>
+                          </div>
+                          <button 
+                            onClick={() => addItem(msg.product!.item)}
+                            className="self-start text-[10px] font-sans uppercase font-bold text-[var(--color-amber)] hover:underline tracking-widest"
+                          >
+                            ADD TO CART
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </div>
               </div>
             ))}
