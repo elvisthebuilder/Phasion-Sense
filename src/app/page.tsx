@@ -27,25 +27,48 @@ export default async function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* SECTION 1 — HERO */}
-      <section className="relative w-full h-screen overflow-hidden bg-[var(--color-onyx)]">
-        <Image 
-          src="https://images.unsplash.com/photo-1618375531912-867984bdfd87?w=1920&q=80&auto=format&fit=crop"
-          alt="African fashion editorial – bold silhouette against warm light"
-          fill
-          className="object-cover opacity-80"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-espresso)]/60 to-transparent bottom-0 h-1/5 top-auto pointer-events-none" />
+      <section className="relative w-full h-screen overflow-hidden bg-[#1a1412] flex items-center justify-center p-4 sm:p-8 md:p-12">
+        {/* Glow Layer (Matching Blur Color behind the image) */}
+        <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8 md:p-12 z-0 pointer-events-none">
+          <div className="relative w-full h-full max-w-[1400px]">
+            <Image 
+              src="https://images.unsplash.com/photo-1531123414780-f74242c2b052?w=1920&q=80&auto=format&fit=crop"
+              alt="Background glow"
+              fill
+              className="object-cover rounded-[3rem] blur-[80px] opacity-70 scale-105 transform-gpu"
+              priority
+            />
+          </div>
+        </div>
+
+        {/* Foreground Scaled Image */}
+        <div className="relative w-full h-full max-w-[1400px] overflow-hidden rounded-[2.5rem] shadow-[0_20px_80px_rgba(0,0,0,0.6)] z-10 group">
+          {/* Edge Borders - Hiding the corners */}
+          <div className="absolute top-0 inset-x-12 md:inset-x-20 border-t border-white/25 z-30 pointer-events-none mix-blend-overlay transition-opacity duration-500 opacity-70 group-hover:opacity-100" />
+          <div className="absolute bottom-0 inset-x-12 md:inset-x-20 border-b border-white/25 z-30 pointer-events-none mix-blend-overlay transition-opacity duration-500 opacity-70 group-hover:opacity-100" />
+          <div className="absolute left-0 inset-y-12 md:inset-y-20 border-l border-white/25 z-30 pointer-events-none mix-blend-overlay transition-opacity duration-500 opacity-70 group-hover:opacity-100" />
+          <div className="absolute right-0 inset-y-12 md:inset-y-20 border-r border-white/25 z-30 pointer-events-none mix-blend-overlay transition-opacity duration-500 opacity-70 group-hover:opacity-100" />
+
+          <Image 
+            src="https://images.unsplash.com/photo-1531123414780-f74242c2b052?w=1920&q=80&auto=format&fit=crop"
+            alt="Modern African fashion editorial"
+            fill
+            className="object-cover opacity-90"
+            priority
+          />
+          {/* Internal gradient to blend text cleanly */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1a1412]/90 via-[#1a1412]/20 to-transparent pointer-events-none" />
+        </div>
         
         {/* Top Right Label */}
-        <div className="absolute top-28 right-8 z-10">
+        <div className="absolute top-24 right-8 md:top-28 md:right-20 z-20 pointer-events-none">
           <span className="font-sans text-[var(--color-ivory)] uppercase text-sm tracking-widest drop-shadow-md">
             SS26 COLLECTION
           </span>
         </div>
 
         {/* Bottom Left Content */}
-        <div className="absolute bottom-16 left-8 z-10 max-w-2xl">
+        <div className="absolute bottom-12 left-8 md:bottom-20 md:left-20 z-20 max-w-2xl">
           <h1 className="font-serif text-[clamp(4rem,8vw,8rem)] leading-[0.9] text-white mb-10 text-balance tracking-tight drop-shadow-lg">
             Dressed for <span className="italic">the moment.</span>
           </h1>
