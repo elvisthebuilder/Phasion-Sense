@@ -1,7 +1,8 @@
 import axios from "axios";
+import { config } from "@/config";
 
 export const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://jsonplaceholder.typicode.com",
+    baseURL: config.apiBaseUrl,
     timeout: 10000,
     headers: {
         "Content-Type": "application/json",
