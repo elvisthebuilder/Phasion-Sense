@@ -1,11 +1,15 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { resolveApiImageUrl } from "@/lib/image";
 import { formatGhanaCediCompact } from "@/lib/format";
 import type { ItemResponse } from "@/lib/commerce";
+
+// Import driver.js onboarding package
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 
 type Props = {
   initialItems: ItemResponse[];
@@ -20,6 +24,85 @@ export function ShopClient({ initialItems }: Props) {
   const [aiResults, setAiResults] = useState<ItemResponse[] | null>(null);
 
   const heights = ["h-[800px]", "h-[600px]", "h-[750px]", "h-[650px]", "h-[850px]", "h-[550px]"];
+
+  // Driver.js onboarding tour steps
+  const tourSteps = [
+    {
+      element: "#shop-hero",
+      popover: {
+        title: "Welcome to Phasion Sense",
+        description: "Explore our curated collection of premium contemporary fashion, rooted in Accra.",
+        side: "bottom" as const,
+        align: "start" as const
+      }
+    },
+    {
+      element: "#ai-search-form",
+      popover: {
+        title: "PhasionAI Semantic Search",
+        description: "Looking for something specific? Search using natural language! Try typing 'something dark and formal' or 'casual weekend outfits under GH₵500' and our AI will immediately curate matching items.",
+        side: "bottom" as const,
+        align: "center" as const
+      }
+    },
+    {
+      element: "#category-filters",
+      popover: {
+        title: "Smart Filtering",
+        description: "Quickly browse through individual collections: Tops, Bottoms, Outerwear, Dresses, and Accessories.",
+        side: "bottom" as const,
+        align: "center" as const
+      }
+    },
+    {
+      element: "#product-grid",
+      popover: {
+        title: "Premium Catalog",
+        description: "Click on any product to see the details, or hover to view alternative styling angles and dynamic transition shots.",
+        side: "top" as const,
+        align: "center" as const
+      }
+    },
+    {
+      element: "#phasion-ai-trigger",
+      popover: {
+        title: "Meet PhasionAI Stylist",
+        description: "Your floating shopping companion is available on every page! Tap this bubble to chat directly with PhasionAI for advice on styling, custom outfit combinations, and event styling guidelines.",
+        side: "left" as const,
+        align: "center" as const
+      }
+    }
+  ];
+
+  const startTour = () => {
+    const driverObj = driver({
+      showProgress: true,
+      animate: true,
+      overlayColor: "rgba(28, 20, 16, 0.75)", // Custom espresso color overlay matching theme
+      steps: tourSteps,
+    });
+    driverObj.drive();
+  };
+
+  // Launch onboarding tour automatically for new visitors on mount
+  useEffect(() => {
+    const tourCompleted = localStorage.getItem("phasion_tour_completed");
+    if (!tourCompleted) {
+      const timer = setTimeout(() => {
+        const driverObj = driver({
+          showProgress: true,
+          animate: true,
+          overlayColor: "rgba(28, 20, 16, 0.75)",
+          steps: tourSteps,
+          onDestroyed: () => {
+            localStorage.setItem("phasion_tour_completed", "true");
+          }
+        });
+        driverObj.drive();
+      }, 1200); // Delay slightly to ensure smooth loading and image renders
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   // Category mapping
   const filterByCategory = (category: string, list: ItemResponse[]) => {
@@ -109,7 +192,7 @@ export function ShopClient({ initialItems }: Props) {
     <div className="flex flex-col min-h-screen pt-[84px]">
       
       {/* HERO SECTION */}
-      <section className="relative w-full h-[40vh] overflow-hidden bg-[var(--color-onyx)]">
+      <section id="shop-hero" className="relative w-full h-[40vh] overflow-hidden bg-[var(--color-onyx)]">
         {initialItems[0] && resolveApiImageUrl(initialItems[0].image_urls?.[0]) && (
           <Image 
             src={resolveApiImageUrl(initialItems[0].image_urls?.[0])!} 
@@ -138,7 +221,7 @@ export function ShopClient({ initialItems }: Props) {
       <section className="w-full max-w-[1600px] mx-auto px-8 py-16">
         
         {/* Natural Language Search Bar */}
-        <form onSubmit={handleSearch} className="w-full max-w-[600px] mx-auto mb-16 relative">
+        <form id="ai-search-form" onSubmit={handleSearch} className="w-full max-w-[600px] mx-auto mb-16 relative">
           <input 
             type="text" 
             value={searchQuery}
@@ -179,7 +262,7 @@ export function ShopClient({ initialItems }: Props) {
         )}
 
         {/* Filter Bar */}
-        <div className="w-full flex justify-center gap-8 border-b border-[var(--color-parchment)] pb-6 mb-16 overflow-x-auto">
+        <div id="category-filters" className="w-full flex justify-center gap-8 border-b border-[var(--color-parchment)] pb-6 mb-16 overflow-x-auto">
           {["ALL", "TOPS", "BOTTOMS", "OUTERWEAR", "DRESSES", "ACCESSORIES"].map((filter) => {
             const isActive = activeCategory === filter;
             return (
@@ -219,7 +302,7 @@ export function ShopClient({ initialItems }: Props) {
         ) : (
           <>
             {/* PRODUCT GRID - Part 1 */}
-            <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8 mb-24">
+            <div id="product-grid" className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8 mb-24">
               {part1.map((item, idx) => {
                 const primaryImage = resolveApiImageUrl(item.image_urls?.[0]);
                 const secondaryImage = resolveApiImageUrl(item.image_urls?.[1] ?? item.image_urls?.[0]);
@@ -304,6 +387,17 @@ export function ShopClient({ initialItems }: Props) {
           </>
         )}
       </section>
+
+      {/* FLOATING TOUR TRIGGER BUTTON */}
+      <button 
+        onClick={startTour}
+        className="fixed bottom-8 left-8 bg-white border border-[var(--color-parchment)] shadow-md text-[var(--color-stone)] hover:text-[var(--color-espresso)] hover:border-[var(--color-amber)] text-[10px] font-sans font-bold uppercase tracking-widest px-4 py-3.5 z-40 transition-all rounded-none flex items-center gap-2 hover:scale-105"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5 text-[var(--color-amber)]">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l8.982-11.795m-9 0L18 4.5" />
+        </svg>
+        Take Tour
+      </button>
 
     </div>
   );

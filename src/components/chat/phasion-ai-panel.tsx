@@ -123,6 +123,7 @@ export function PhasionAIPanel() {
       {/* TRIGGER BUTTON WITH CUSTOM LOGO */}
       {!isOpen && (
         <button 
+          id="phasion-ai-trigger"
           onClick={() => setIsOpen(true)}
           className="fixed bottom-8 right-8 w-14 h-14 bg-[var(--color-espresso)] rounded-full flex items-center justify-center border border-[var(--color-amber)] shadow-lg z-50 transition-all hover:scale-110 active:scale-95 group"
         >
