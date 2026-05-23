@@ -1,43 +1,60 @@
 @import "tailwindcss";
 
-:root {
-    color-scheme: light;
-    --background: 210 20% 98%;
-    --foreground: 222 47% 11%;
-    --muted: 214 32% 96%;
-    --muted-foreground: 215 16% 47%;
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --primary: 222 89% 56%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 216 33% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --accent: 214 95% 93%;
-    --accent-foreground: 222 47% 11%;
-    --ring: 222 89% 56%;
+@theme {
+  --color-cream: #F7F3EE;
+  --color-surface: #FFFFFF;
+  --color-espresso: #1C1410;
+  --color-amber: #E8920A;
+  --color-sand: #D4A97A;
+  --color-stone: #8C7B6E;
+  --color-parchment: #E5DDD5;
+  --color-onyx: #0F0F0F;
+  --color-ivory: #F0EBE1;
+
+  --font-cormorant: var(--font-cormorant);
+  --font-playfair: var(--font-playfair);
+  --font-dm-sans: var(--font-dm-sans);
 }
 
+:root {
+  color-scheme: light;
+}
+
+/* Strict Design Rules */
 * {
-    border-color: hsl(var(--border));
+  border-color: var(--color-parchment);
+  box-shadow: none !important; /* No shadows anywhere */
+  border-radius: 0; /* Base reset */
+}
+
+/* Max border radius is 2px per rules */
+.rounded, .rounded-md, .rounded-lg, .rounded-xl, .rounded-full, .rounded-sm {
+    border-radius: 2px !important; 
+}
+/* Exception for the circular logo/avatar if needed */
+.rounded-circle {
+    border-radius: 50% !important;
 }
 
 html {
-    scroll-behavior: smooth;
+  scroll-behavior: smooth;
 }
 
 body {
-    min-height: 100vh;
-    background:
-        radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 36%),
-        radial-gradient(circle at top right, rgba(14, 165, 233, 0.12), transparent 30%),
-        hsl(var(--background));
-    color: hsl(var(--foreground));
-    font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  background-color: var(--color-cream);
+  color: var(--color-espresso);
+  font-family: var(--font-dm-sans), sans-serif;
+  /* No gradients allowed */
+  background-image: none;
+}
+
+/* Headings use Playfair Display */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-playfair), serif;
 }
 
 a {
-    color: inherit;
-    text-decoration: none;
+  color: inherit;
+  text-decoration: none;
 }

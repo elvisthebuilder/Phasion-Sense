@@ -1,22 +1,36 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
-import { AppShell } from "@/components/layout/app-shell";
+import { Cormorant_Garamond, Playfair_Display, DM_Sans } from "next/font/google";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "@/components/layout/footer";
+import { CartDrawer } from "@/components/shop/cart-drawer";
+import { CheckoutModal } from "@/components/shop/checkout-modal";
+import { PhasionAIPanel } from "@/components/chat/phasion-ai-panel";
 import "./globals.css";
 
-const inter = Inter({
+const cormorant = Cormorant_Garamond({
     subsets: ["latin"],
-    variable: "--font-inter",
+    weight: ["300", "400", "500", "600", "700"],
+    variable: "--font-cormorant",
+    style: ["normal", "italic"]
 });
 
-const spaceGrotesk = Space_Grotesk({
+const playfair = Playfair_Display({
     subsets: ["latin"],
-    variable: "--font-space-grotesk",
+    weight: ["400", "500", "600", "700", "800", "900"],
+    variable: "--font-playfair",
+    style: ["normal", "italic"]
+});
+
+const dmSans = DM_Sans({
+    subsets: ["latin"],
+    weight: ["400", "500", "700"],
+    variable: "--font-dm-sans",
 });
 
 export const metadata: Metadata = {
     title: "Phasion Sense",
-    description: "Premium fashion commerce storefront for the Phasion Sense hackathon build.",
+    description: "Editorial fashion, rooted in Accra.",
 };
 
 export default function RootLayout({
@@ -26,9 +40,16 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className={`${inter.variable} ${spaceGrotesk.variable}`}>
+            <body className={`${cormorant.variable} ${playfair.variable} ${dmSans.variable} font-sans antialiased bg-[var(--color-cream)] text-[var(--color-espresso)]`}>
                 <QueryProvider>
-                    <AppShell>{children}</AppShell>
+                    <main className="min-h-screen flex flex-col relative">
+                        <Navbar />
+                        {children}
+                        <Footer />
+                        <CartDrawer />
+                        <CheckoutModal />
+                        <PhasionAIPanel />
+                    </main>
                 </QueryProvider>
             </body>
         </html>

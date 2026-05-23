@@ -2,7 +2,7 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cn } from "@/lib/utils";
 
-type ButtonVariant = "default" | "outline" | "secondary" | "ghost";
+type ButtonVariant = "default" | "secondary" | "ghost" | "outline";
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     asChild?: boolean;
@@ -11,17 +11,21 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const buttonVariants: Record<ButtonVariant, string> = {
-    default: "bg-slate-950 text-white shadow-sm hover:bg-slate-800 hover:shadow-md",
-    outline: "border border-slate-200 bg-white text-slate-900 shadow-sm hover:border-slate-300 hover:bg-slate-50",
-    secondary: "bg-slate-100 text-slate-900 hover:bg-slate-200",
-    ghost: "bg-transparent text-slate-700 hover:bg-slate-100 hover:text-slate-950",
+    // Primary: flat #E8920A background, #FFFFFF DM Sans uppercase, 2px border-radius
+    default: "bg-[var(--color-amber)] text-[var(--color-surface)] hover:bg-[#d18309]",
+    // Secondary: flat #1C1410 background, #F0EBE1 DM Sans uppercase, 2px border-radius
+    secondary: "bg-[var(--color-espresso)] text-[var(--color-ivory)] hover:bg-[#2a1e18]",
+    // Ghost: no background, #E8920A DM Sans uppercase text, no border
+    ghost: "bg-transparent text-[var(--color-amber)] hover:bg-[var(--color-parchment)]",
+    // Custom Outline for other needs
+    outline: "border border-[var(--color-parchment)] bg-transparent text-[var(--color-espresso)] hover:bg-[var(--color-parchment)]",
 };
 
 const sizeVariants = {
-    default: "h-10 px-4 py-2",
-    sm: "h-9 rounded-md px-3",
-    lg: "h-11 rounded-xl px-6",
-    icon: "h-10 w-10",
+    default: "h-12 px-6 py-3 text-sm tracking-[0.08em]",
+    sm: "h-10 px-4 text-xs tracking-[0.08em]",
+    lg: "h-14 px-8 text-base tracking-[0.08em]",
+    icon: "h-12 w-12",
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function Button(
@@ -34,9 +38,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
         <Comp
             ref={ref}
             className={cn(
-                "inline-flex items-center justify-center gap-2 rounded-full text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:pointer-events-none disabled:opacity-50",
+                "inline-flex items-center justify-center font-sans font-bold uppercase transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
                 buttonVariants[variant],
                 sizeVariants[size],
+                // Force max 2px radius globally per rules
+                "rounded-[2px]", 
                 className,
             )}
             {...props}
