@@ -42,11 +42,21 @@ export default async function CampaignDetailPage({ params }: Props) {
     notFound();
   }
 
-  const heroImage = resolveApiImageUrl(campaign.image_urls?.[0]);
-  const additionalImages = (campaign.image_urls ?? [])
-    .slice(1)
-    .map(resolveApiImageUrl)
-    .filter(Boolean) as string[];
+  const modernImages = [
+    "https://images.unsplash.com/photo-1543269664-76b420e6a8e6?w=1920&q=80&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1920&q=80&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1920&q=80&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1531123414780-f74242c2b052?w=1920&q=80&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1523825036634-aab3cce05919?w=1920&q=80&auto=format&fit=crop",
+  ];
+  
+  const seed = id.charCodeAt(0) + id.charCodeAt(id.length - 1);
+  const heroImage = modernImages[seed % modernImages.length];
+  const additionalImages = [
+    modernImages[(seed + 1) % modernImages.length],
+    modernImages[(seed + 2) % modernImages.length],
+    modernImages[(seed + 3) % modernImages.length]
+  ];
 
   return (
     <div className="flex flex-col min-h-screen bg-[var(--color-cream)]">

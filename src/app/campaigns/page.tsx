@@ -57,7 +57,14 @@ export default async function CampaignsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border border-[var(--color-parchment)]">
             {campaigns.map((campaign, idx) => {
-              const coverImg = resolveApiImageUrl(campaign.image_urls?.[0]);
+              const modernImages = [
+                "https://images.unsplash.com/photo-1543269664-76b420e6a8e6?w=1920&q=80&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1920&q=80&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1920&q=80&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1531123414780-f74242c2b052?w=1920&q=80&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1523825036634-aab3cce05919?w=1920&q=80&auto=format&fit=crop",
+              ];
+              const coverImg = modernImages[idx % modernImages.length];
               const isLarge = idx === 0;
 
               return (
