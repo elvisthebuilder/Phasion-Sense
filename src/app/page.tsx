@@ -15,7 +15,6 @@ export default async function Home() {
   ]);
 
   const newArrivals = items.slice(0, 6);
-  const heroImage = resolveApiImageUrl(campaigns[0]?.image_urls?.[0] ?? items[0]?.image_urls?.[0]);
   const editImage = resolveApiImageUrl(campaigns[0]?.image_urls?.[1] ?? items[1]?.image_urls?.[0]);
   const lookbook1 = resolveApiImageUrl(items[2]?.image_urls?.[0]);
   const lookbook2 = resolveApiImageUrl(items[3]?.image_urls?.[0]);
@@ -29,15 +28,13 @@ export default async function Home() {
     <div className="flex flex-col min-h-screen">
       {/* SECTION 1 — HERO */}
       <section className="relative w-full h-screen overflow-hidden bg-[var(--color-onyx)]">
-        {heroImage && (
-          <Image 
-            src={heroImage} 
-            alt="Dressed for the moment"
-            fill
-            className="object-cover opacity-80"
-            priority
-          />
-        )}
+        <Image 
+          src="https://images.unsplash.com/photo-1618375531912-867984bdfd87?w=1920&q=80&auto=format&fit=crop"
+          alt="African fashion editorial – bold silhouette against warm light"
+          fill
+          className="object-cover opacity-80"
+          priority
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-espresso)]/60 to-transparent bottom-0 h-1/5 top-auto pointer-events-none" />
         
         {/* Top Right Label */}
