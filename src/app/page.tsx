@@ -27,9 +27,9 @@ export default async function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* SECTION 1 — HERO */}
-      <section className="relative w-full h-screen overflow-hidden bg-[#1a1412] flex items-center justify-center p-4 pt-24 sm:p-8 sm:pt-28 md:p-12 md:pt-36">
+      <section className="relative w-full h-screen overflow-hidden bg-[#1a1412] flex items-center justify-center p-4 pt-20 sm:p-8 sm:pt-24 md:p-12 md:pt-24">
         {/* Glow Layer (Matching Blur Color behind the image) */}
-        <div className="absolute inset-0 flex items-center justify-center p-4 pt-24 sm:p-8 sm:pt-28 md:p-12 md:pt-36 z-0 pointer-events-none">
+        <div className="absolute inset-0 flex items-center justify-center p-4 pt-20 sm:p-8 sm:pt-24 md:p-12 md:pt-24 z-0 pointer-events-none">
           <div className="relative w-full h-full max-w-[1400px]">
             <Image 
               src="https://images.unsplash.com/photo-1531123414780-f74242c2b052?w=1920&q=80&auto=format&fit=crop"
