@@ -46,11 +46,11 @@ export function buildSearchPrompt(catalog: ItemResponse[], query: string): strin
     id: item.id,
     name: item.name,
     description: item.description,
-    price_minor: item.price_minor,
+    price: `GH₵${(item.price_minor / 100).toFixed(2)}`,
     in_stock: item.in_stock,
   }));
 
-  return `You are PhasionAI, the search engine intelligence for Phasion Sense.
+  return `You are PhasionAI, the search engine intelligence for Phasion Sense, a luxury fashion brand in Accra, Ghana.
 Your job is to parse a user's natural language search query and return a list of matching product IDs from the catalog.
 
 User Search Query: "${query}"
@@ -60,6 +60,7 @@ ${JSON.stringify(compactCatalog, null, 2)}
 
 Instructions:
 1. Filter the catalog for items that match the user's query (by style, color, occasion, price limits, stock, etc.).
+   - Note: Prices are listed in Ghana Cedis (GH₵). When the user specifies price constraints (e.g., 'under 500 cedis', 'less than 600', 'above 100'), parse the decimal number in the 'price' field (ignoring the GH₵ symbol) to evaluate the condition.
 2. Rank the matching items by relevance.
 3. Return ONLY a valid JSON object matching the following TypeScript type. Do not wrap it in markdown code blocks. Do not write any conversational text.
 
