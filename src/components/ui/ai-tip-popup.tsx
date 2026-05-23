@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import { X, Sparkles } from "lucide-react";
+import { useAiPanelStore } from "@/stores/ai-panel-store";
 
 export function AiTipPopup() {
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const openPanel = useAiPanelStore((s) => s.open);
 
   useEffect(() => {
     // Don't show again if already dismissed this session
@@ -55,6 +57,7 @@ export function AiTipPopup() {
             Don&apos;t know what to wear?
           </p>
           <button
+            onClick={() => { openPanel(); handleDismiss(); }}
             className="font-sans text-[var(--color-amber)] text-xs uppercase tracking-widest mt-1 hover:underline underline-offset-4 text-left transition-colors cursor-pointer"
           >
             Let the AI help you →

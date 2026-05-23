@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useAiPanelStore } from "@/stores/ai-panel-store";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -16,7 +17,9 @@ type Message = {
 };
 
 export function PhasionAIPanel() {
-  const [isOpen, setIsOpen] = useState(false);
+  const isOpen = useAiPanelStore((s) => s.isOpen);
+  const openPanel = useAiPanelStore((s) => s.open);
+  const closePanel = useAiPanelStore((s) => s.close);
   const [input, setInput] = useState("");
   const [catalog, setCatalog] = useState<ItemResponse[]>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -128,7 +131,7 @@ export function PhasionAIPanel() {
   }, [pathname, catalog, isOpen, lastReactedProductId]);
 
   const handleOpen = () => {
-    setIsOpen(true);
+    openPanel();
     setHasNewNudge(false);
     setNudgeText(null);
     if (stagedResponse) {
@@ -321,7 +324,7 @@ export function PhasionAIPanel() {
                 <span className="font-sans text-[var(--color-stone)] text-[10px] italic">Your AI Stylist</span>
               </div>
             </div>
-            <button onClick={() => setIsOpen(false)} className="text-[var(--color-ivory)] hover:text-[var(--color-amber)] transition-colors p-1">
+            <button onClick={closePanel} className="text-[var(--color-ivory)] hover:text-[var(--color-amber)] transition-colors p-1">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
               </svg>
