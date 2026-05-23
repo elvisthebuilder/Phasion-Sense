@@ -1,33 +1,42 @@
-"use client";
-
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { getMerchantItems } from "@/lib/commerce";
+import { resolveApiImageUrl } from "@/lib/image";
+import { formatGhanaCediCompact } from "@/lib/format";
 
-export default function ShopPage() {
+export default async function ShopPage() {
+  const items = await getMerchantItems().catch(() => []);
+  const part1 = items.slice(0, 6);
+  const part2 = items.slice(6);
+
+  const heights = ["h-[800px]", "h-[600px]", "h-[750px]", "h-[650px]", "h-[850px]", "h-[550px]"];
+
   return (
     <div className="flex flex-col min-h-screen pt-[84px]"> {/* Offset for navbar */}
       
       {/* HERO SECTION */}
-      <section className="relative w-full h-[40vh] overflow-hidden">
-        <Image 
-          src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=1600&q=80" 
-          alt="The Collection"
-          fill
-          className="object-cover"
-          priority
-        />
+      <section className="relative w-full h-[40vh] overflow-hidden bg-[var(--color-onyx)]">
+        {items[0] && resolveApiImageUrl(items[0].image_urls?.[0]) && (
+          <Image 
+            src={resolveApiImageUrl(items[0].image_urls?.[0])!} 
+            alt="The Collection"
+            fill
+            className="object-cover opacity-80"
+            priority
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-espresso)]/40 to-transparent bottom-0 h-[30%] top-auto pointer-events-none" />
         
         <div className="absolute top-6 left-8 z-10">
           <span className="font-sans text-[var(--color-ivory)] uppercase text-xs tracking-widest drop-shadow-md">
-            SS26 — 84 PIECES
+            SS26 — {items.length} PIECES
           </span>
         </div>
 
         <div className="absolute bottom-8 left-8 z-10">
-          <h1 className="font-serif text-[clamp(3rem,6vw,5rem)] text-white font-bold tracking-tight">
+          <h1 className="font-serif text-[clamp(3rem,6vw,5rem)] text-white font-bold tracking-tight drop-shadow-lg">
             The Collection
           </h1>
         </div>
@@ -65,30 +74,34 @@ export default function ShopPage() {
 
         {/* PRODUCT GRID - Part 1 */}
         <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8 mb-24">
-          {[
-            { id: "1", name: "The Onyx Drape Coat", price: "GH₵ 1,240", img1: "https://images.unsplash.com/photo-1544441893-675973e31985?w=600&q=80", img2: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80", height: "h-[800px]" },
-            { id: "2", name: "Ivory Silk Blouse", price: "GH₵ 650", img1: "https://images.unsplash.com/photo-1598554747436-c9293d6a588f?w=600&q=80", img2: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=600&q=80", height: "h-[600px]" },
-            { id: "3", name: "Structured Noir Trousers", price: "GH₵ 890", img1: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80", img2: "https://images.unsplash.com/photo-1554412933-514a83d2f3c8?w=600&q=80", height: "h-[750px]" },
-            { id: "4", name: "Amber Pleated Skirt", price: "GH₵ 720", img1: "https://images.unsplash.com/photo-1584273143981-41c073dfe8f8?w=600&q=80", img2: "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=600&q=80", height: "h-[650px]" },
-            { id: "5", name: "Harmattan Linen Shirt", price: "GH₵ 540", img1: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600&q=80", img2: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&q=80", height: "h-[850px]" },
-            { id: "6", name: "Stone Minimalist Dress", price: "GH₵ 1,150", img1: "https://images.unsplash.com/photo-1583391733958-d1501eq4d628?w=600&q=80", img2: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80", height: "h-[550px]" },
-          ].map((item, idx) => (
-            <div key={idx} className="break-inside-avoid relative group mb-8">
-              <Link href={`/shop/${item.id}`} className="block">
-                <div className={`relative w-full ${item.height} bg-[var(--color-parchment)] overflow-hidden`}>
-                  <Image src={item.img1} alt={item.name} fill className="object-cover transition-opacity duration-500 ease-in-out group-hover:opacity-0" />
-                  <Image src={item.img2} alt={item.name} fill className="object-cover absolute inset-0 opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100" />
-                  <div className="absolute bottom-0 left-0 w-full bg-[var(--color-espresso)] text-[var(--color-ivory)] py-4 text-center font-sans uppercase text-xs tracking-widest translate-y-full transition-transform duration-300 ease-in-out group-hover:translate-y-0">
-                    QUICK ADD
+          {part1.map((item, idx) => {
+            const primaryImage = resolveApiImageUrl(item.image_urls?.[0]);
+            const secondaryImage = resolveApiImageUrl(item.image_urls?.[1] ?? item.image_urls?.[0]);
+            
+            return (
+              <div key={item.id} className="break-inside-avoid relative group mb-8">
+                <Link href={`/shop/${item.id}`} className="block">
+                  <div className={`relative w-full ${heights[idx % heights.length]} bg-[var(--color-parchment)] overflow-hidden`}>
+                    {primaryImage && (
+                      <Image src={primaryImage} alt={item.name} fill className="object-cover transition-opacity duration-500 ease-in-out group-hover:opacity-0" />
+                    )}
+                    {secondaryImage && (
+                      <Image src={secondaryImage} alt={item.name} fill className="object-cover absolute inset-0 opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100" />
+                    )}
+                    <div className="absolute bottom-0 left-0 w-full bg-[var(--color-espresso)] text-[var(--color-ivory)] py-4 text-center font-sans uppercase text-xs tracking-widest translate-y-full transition-transform duration-300 ease-in-out group-hover:translate-y-0">
+                      VIEW PRODUCT
+                    </div>
                   </div>
-                </div>
-                <div className="mt-4 flex flex-col gap-1">
-                  <h4 className="font-serif text-[var(--color-espresso)] text-lg">{item.name}</h4>
-                  <p className="font-sans text-[var(--color-amber)] uppercase text-sm tracking-widest">{item.price}</p>
-                </div>
-              </Link>
-            </div>
-          ))}
+                  <div className="mt-4 flex flex-col gap-1">
+                    <h4 className="font-serif text-[var(--color-espresso)] text-lg">{item.name}</h4>
+                    <p className="font-sans text-[var(--color-amber)] uppercase text-sm tracking-widest">
+                      {formatGhanaCediCompact(item.price_minor)}
+                    </p>
+                  </div>
+                </Link>
+              </div>
+            );
+          })}
         </div>
 
       </section>
@@ -104,37 +117,46 @@ export default function ShopPage() {
       </section>
 
       {/* PRODUCT GRID - Part 2 (Infinite Scroll Simulation) */}
-      <section className="w-full max-w-[1600px] mx-auto px-8 py-16 mb-24">
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8 mb-16">
-          {[
-            { id: "7", name: "Dusk Silhouette Blazer", price: "GH₵ 1,600", img1: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&q=80", img2: "https://images.unsplash.com/photo-1505322022379-7c3353ee6291?w=600&q=80", height: "h-[800px]" },
-            { id: "8", name: "Onyx Knit Mockneck", price: "GH₵ 480", img1: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=600&q=80", img2: "https://images.unsplash.com/photo-1495385794356-15371f348c31?w=600&q=80", height: "h-[550px]" },
-            { id: "9", name: "Sand Asymmetric Top", price: "GH₵ 520", img1: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=600&q=80", img2: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80", height: "h-[700px]" },
-          ].map((item, idx) => (
-            <div key={idx} className="break-inside-avoid relative group mb-8">
-              <Link href={`/shop/${item.id}`} className="block">
-                <div className={`relative w-full ${item.height} bg-[var(--color-parchment)] overflow-hidden`}>
-                  <Image src={item.img1} alt={item.name} fill className="object-cover transition-opacity duration-500 ease-in-out group-hover:opacity-0" />
-                  <Image src={item.img2} alt={item.name} fill className="object-cover absolute inset-0 opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100" />
-                  <div className="absolute bottom-0 left-0 w-full bg-[var(--color-espresso)] text-[var(--color-ivory)] py-4 text-center font-sans uppercase text-xs tracking-widest translate-y-full transition-transform duration-300 ease-in-out group-hover:translate-y-0">
-                    QUICK ADD
-                  </div>
+      {part2.length > 0 && (
+        <section className="w-full max-w-[1600px] mx-auto px-8 py-16 mb-24">
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8 mb-16">
+            {part2.map((item, idx) => {
+              const primaryImage = resolveApiImageUrl(item.image_urls?.[0]);
+              const secondaryImage = resolveApiImageUrl(item.image_urls?.[1] ?? item.image_urls?.[0]);
+              
+              return (
+                <div key={item.id} className="break-inside-avoid relative group mb-8">
+                  <Link href={`/shop/${item.id}`} className="block">
+                    <div className={`relative w-full ${heights[(idx + 2) % heights.length]} bg-[var(--color-parchment)] overflow-hidden`}>
+                      {primaryImage && (
+                        <Image src={primaryImage} alt={item.name} fill className="object-cover transition-opacity duration-500 ease-in-out group-hover:opacity-0" />
+                      )}
+                      {secondaryImage && (
+                        <Image src={secondaryImage} alt={item.name} fill className="object-cover absolute inset-0 opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100" />
+                      )}
+                      <div className="absolute bottom-0 left-0 w-full bg-[var(--color-espresso)] text-[var(--color-ivory)] py-4 text-center font-sans uppercase text-xs tracking-widest translate-y-full transition-transform duration-300 ease-in-out group-hover:translate-y-0">
+                        VIEW PRODUCT
+                      </div>
+                    </div>
+                    <div className="mt-4 flex flex-col gap-1">
+                      <h4 className="font-serif text-[var(--color-espresso)] text-lg">{item.name}</h4>
+                      <p className="font-sans text-[var(--color-amber)] uppercase text-sm tracking-widest">
+                        {formatGhanaCediCompact(item.price_minor)}
+                      </p>
+                    </div>
+                  </Link>
                 </div>
-                <div className="mt-4 flex flex-col gap-1">
-                  <h4 className="font-serif text-[var(--color-espresso)] text-lg">{item.name}</h4>
-                  <p className="font-sans text-[var(--color-amber)] uppercase text-sm tracking-widest">{item.price}</p>
-                </div>
-              </Link>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
 
-        <div className="w-full text-center py-12">
-          <span className="font-sans text-[var(--color-stone)] uppercase tracking-widest text-sm">
-            Loading more...
-          </span>
-        </div>
-      </section>
+          <div className="w-full text-center py-12">
+            <span className="font-sans text-[var(--color-stone)] uppercase tracking-widest text-sm">
+              End of collection.
+            </span>
+          </div>
+        </section>
+      )}
 
     </div>
   );
