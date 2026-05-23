@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 export function Footer() {
@@ -7,9 +8,13 @@ export function Footer() {
       <div className="max-w-[1600px] mx-auto">
         {/* Top Row: Logo & Tagline */}
         <div className="flex flex-col items-center mb-24 text-center">
-          <div className="w-16 h-16 rounded-full border border-[var(--color-amber)] flex items-center justify-center text-[var(--color-amber)] font-serif font-bold text-xl mb-6">
-            GH
-          </div>
+          <Image 
+            src="/logo.png" 
+            alt="Phasion Sense Logo" 
+            width={80} 
+            height={80} 
+            className="w-20 h-20 object-contain mb-6"
+          />
           <p className="font-serif italic text-2xl tracking-wide">
             Editorial fashion, rooted in Accra.
           </p>

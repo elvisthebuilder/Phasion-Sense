@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -25,19 +26,14 @@ export function Navbar() {
       <div className="max-w-[1600px] mx-auto flex items-center justify-between">
         {/* Left: Logo */}
         <Link href="/" className="flex items-center gap-2">
-          {/* Circular Badge Logo Placeholder */}
-          <div className={cn(
-            "w-9 h-9 rounded-full border flex items-center justify-center text-xs font-serif font-bold transition-colors",
-            isScrolled ? "bg-transparent border-[var(--color-amber)] text-[var(--color-amber)]" : "bg-transparent border-[var(--color-ivory)] text-[var(--color-ivory)]"
-          )}>
-            GH
-          </div>
-          <span className={cn(
-            "font-serif tracking-widest text-sm uppercase",
-            isScrolled ? "text-[var(--color-espresso)]" : "text-[var(--color-ivory)]"
-          )}>
-            Phasion Sense
-          </span>
+          <Image 
+            src="/logo.png" 
+            alt="Phasion Sense Logo" 
+            width={48} 
+            height={48} 
+            className="w-12 h-12 object-contain"
+            priority
+          />
         </Link>
 
         {/* Right: Links & Cart */}
