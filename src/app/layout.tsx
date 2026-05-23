@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/footer";
 import { CartDrawer } from "@/components/shop/cart-drawer";
 import { CheckoutModal } from "@/components/shop/checkout-modal";
 import { PhasionAIPanel } from "@/components/chat/phasion-ai-panel";
+import { AiTipPopup } from "@/components/ui/ai-tip-popup";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -49,6 +50,7 @@ export default function RootLayout({
                         <CartDrawer />
                         <CheckoutModal />
                         <PhasionAIPanel />
+                        <AiTipPopup />
                     </main>
                 </QueryProvider>
             </body>

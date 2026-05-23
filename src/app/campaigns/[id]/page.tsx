@@ -95,17 +95,6 @@ export default async function CampaignDetailPage({ params }: Props) {
         </div>
       </section>
 
-      {/* BREADCRUMB & TIP STRIP */}
-      <section className="w-full bg-[var(--color-cream)] px-8 py-6 border-b border-[var(--color-parchment)]">
-        <div className="max-w-[1400px] mx-auto flex justify-center sm:justify-end items-center">
-          <div className="flex items-center gap-2 bg-[var(--color-amber)]/10 text-[var(--color-espresso)] px-4 py-2 rounded-full font-sans text-xs uppercase tracking-widest border border-[var(--color-amber)]/20">
-            <span className="opacity-80">💡 Don't know what to wear?</span>
-            <Link href="#" className="font-semibold underline decoration-[var(--color-amber)]/50 hover:decoration-[var(--color-amber)] underline-offset-4 hover:text-[var(--color-amber)] transition-colors">
-              Let the AI help you
-            </Link>
-          </div>
-        </div>
-      </section>
 
       {/* FEATURED ITEMS */}
       {campaign.featured_items.length > 0 && (
