@@ -1,4 +1,5 @@
 # Phasion Sense 🌟
+Builders: Elvis & Kephas
 
 Phasion Sense is a premium, contemporary e-commerce and interactive lookbook application. Rooted in Accra, Ghana, it bridges rich cultural heritage with modern avant-garde design, offering a sleek, high-fashion shopping experience coupled with advanced AI-powered styling services.
 
