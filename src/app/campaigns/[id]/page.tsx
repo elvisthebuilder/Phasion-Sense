@@ -97,14 +97,7 @@ export default async function CampaignDetailPage({ params }: Props) {
 
       {/* BREADCRUMB & TIP STRIP */}
       <section className="w-full bg-[var(--color-cream)] px-8 py-6 border-b border-[var(--color-parchment)]">
-        <div className="max-w-[1400px] mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-          <Link
-            href="/campaigns"
-            className="inline-flex items-center gap-2 font-sans text-[var(--color-stone)] hover:text-[var(--color-espresso)] text-xs uppercase tracking-widest transition-colors"
-          >
-            <span className="text-lg leading-none mb-[2px]">←</span> All Campaigns
-          </Link>
-
+        <div className="max-w-[1400px] mx-auto flex justify-center sm:justify-end items-center">
           <div className="flex items-center gap-2 bg-[var(--color-amber)]/10 text-[var(--color-espresso)] px-4 py-2 rounded-full font-sans text-xs uppercase tracking-widest border border-[var(--color-amber)]/20">
             <span className="opacity-80">💡 Don't know what to wear?</span>
             <Link href="#" className="font-semibold underline decoration-[var(--color-amber)]/50 hover:decoration-[var(--color-amber)] underline-offset-4 hover:text-[var(--color-amber)] transition-colors">
