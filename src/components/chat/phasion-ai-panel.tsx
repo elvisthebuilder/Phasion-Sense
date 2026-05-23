@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useCartStore } from "@/stores/cart-store";
 import { resolveApiImageUrl } from "@/lib/image";
 import { formatGhanaCediCompact } from "@/lib/format";
@@ -22,6 +23,12 @@ export function PhasionAIPanel() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const addItem = useCartStore((s) => s.addItem);
+  const pathname = usePathname();
+
+  const [nudgeText, setNudgeText] = useState<string | null>(null);
+  const [stagedResponse, setStagedResponse] = useState<Message | null>(null);
+  const [lastReactedProductId, setLastReactedProductId] = useState<string | null>(null);
+  const [hasNewNudge, setHasNewNudge] = useState(false);
   
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -30,14 +37,105 @@ export function PhasionAIPanel() {
     }
   ]);
 
-  // Load catalog when panel opens so we have the products locally to match IDs
+  // Load catalog so it's always ready for proactive recommendations
   useEffect(() => {
-    if (isOpen && catalog.length === 0) {
+    if (catalog.length === 0) {
       getMerchantItems()
         .then(setCatalog)
-        .catch((err) => console.error("Error fetching catalog in chat:", err));
+        .catch((err) => console.error("Error fetching catalog:", err));
     }
-  }, [isOpen, catalog.length]);
+  }, [catalog.length]);
+
+  // Listen to path changes to trigger proactive AI Shopper suggestions
+  useEffect(() => {
+    const match = pathname?.match(/^\/shop\/([^/]+)$/);
+    if (!match) return;
+
+    const productId = match[1];
+    
+    // Ignore if user is just viewing the same product
+    if (productId === lastReactedProductId) return;
+    setLastReactedProductId(productId);
+
+    const runReaction = async (items: ItemResponse[]) => {
+      const product = items.find((p) => p.id === productId);
+      if (!product) return;
+
+      if (isOpen) {
+        setIsTyping(true);
+      }
+
+      try {
+        const response = await fetch("/api/phasion-ai", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            feature: "shopper-reaction",
+            currentProduct: product,
+          }),
+        });
+
+        if (!response.ok) throw new Error("Reaction failed");
+
+        const data = await response.json();
+        const replyText = data.reply || "";
+
+        // Extract [PRODUCT:id] tags from reply
+        const productRegex = /\[PRODUCT:([a-zA-Z0-9\-_]+)\]/g;
+        const matchedIds: string[] = [];
+        let m;
+        while ((m = productRegex.exec(replyText)) !== null) {
+          matchedIds.push(m[1]);
+        }
+
+        const cleanedReply = replyText.replace(productRegex, "").trim();
+        const matchedProducts = matchedIds
+          .map((id) => items.find((item) => item.id === id))
+          .filter((item): item is ItemResponse => !!item);
+
+        const newMsg: Message = {
+          role: "ai",
+          content: cleanedReply,
+          products: matchedProducts,
+        };
+
+        if (isOpen) {
+          setMessages((prev) => [...prev, newMsg]);
+        } else {
+          setStagedResponse(newMsg);
+          setNudgeText(`I've found some wonderful styling options for the ${product.name}! ✨`);
+          setHasNewNudge(true);
+        }
+      } catch (err) {
+        console.error("Proactive shopper reaction error:", err);
+      } finally {
+        setIsTyping(false);
+      }
+    };
+
+    if (catalog.length > 0) {
+      runReaction(catalog);
+    } else {
+      getMerchantItems()
+        .then((items) => {
+          setCatalog(items);
+          runReaction(items);
+        })
+        .catch((err) => console.error("Error loading items on path change:", err));
+    }
+  }, [pathname, catalog, isOpen, lastReactedProductId]);
+
+  const handleOpen = () => {
+    setIsOpen(true);
+    setHasNewNudge(false);
+    setNudgeText(null);
+    if (stagedResponse) {
+      setMessages((prev) => [...prev, stagedResponse]);
+      setStagedResponse(null);
+    }
+  };
 
   // Auto scroll to bottom
   useEffect(() => {
@@ -166,16 +264,46 @@ export function PhasionAIPanel() {
     <>
       {/* TRIGGER BUTTON WITH CUSTOM LOGO */}
       {!isOpen && (
-        <button 
-          id="phasion-ai-trigger"
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-8 right-8 w-14 h-14 bg-[var(--color-espresso)] rounded-full flex items-center justify-center border border-[var(--color-amber)] shadow-lg z-50 transition-all hover:scale-110 active:scale-95 group"
-        >
-          <div className="relative w-8 h-8 rounded-full overflow-hidden bg-white">
-            <Image src="/logo.png" alt="PhasionAI Stylist" fill className="object-contain p-1" />
-          </div>
-          <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-[var(--color-espresso)] animate-pulse" />
-        </button>
+        <div className="fixed bottom-8 right-8 z-50 flex flex-col items-end">
+          {nudgeText && (
+            <div 
+              onClick={handleOpen}
+              className="mb-3 bg-white border border-[var(--color-parchment)] p-4 max-w-[260px] text-xs font-sans text-[var(--color-espresso)] cursor-pointer relative animate-fade-in group hover:border-[var(--color-amber)] transition-all"
+            >
+              <div className="font-bold text-[var(--color-amber)] uppercase text-[9px] tracking-wider mb-1 flex items-center justify-between">
+                <span>Stylist Curation</span>
+                <span 
+                  onClick={(e) => { e.stopPropagation(); setNudgeText(null); }} 
+                  className="hover:text-red-500 font-sans text-sm font-bold leading-none px-1"
+                >
+                  ×
+                </span>
+              </div>
+              <p className="line-clamp-3 italic text-[var(--color-stone)]">"{nudgeText}"</p>
+              
+              {/* Arrow */}
+              <div className="absolute right-6 -bottom-[6px] w-2.5 h-2.5 bg-white border-r border-b border-[var(--color-parchment)] rotate-45 group-hover:border-[var(--color-amber)] transition-all" />
+            </div>
+          )}
+          <button 
+            id="phasion-ai-trigger"
+            onClick={handleOpen}
+            className={`w-14 h-14 bg-[var(--color-espresso)] rounded-circle flex items-center justify-center border border-[var(--color-amber)] shadow-lg transition-all hover:scale-110 active:scale-95 group relative ${
+              hasNewNudge ? "animate-pulse border-2" : ""
+            }`}
+          >
+            <div className="relative w-8 h-8 rounded-circle overflow-hidden bg-white">
+              <Image src="/logo.png" alt="PhasionAI Stylist" fill className="object-contain p-1" />
+            </div>
+            {hasNewNudge ? (
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[var(--color-amber)] text-[10px] text-white font-sans font-bold flex items-center justify-center rounded-circle border border-[var(--color-espresso)] animate-bounce">
+                !
+              </span>
+            ) : (
+              <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-circle border-2 border-[var(--color-espresso)] animate-pulse" />
+            )}
+          </button>
+        </div>
       )}
 
       {/* EXPANDED PANEL */}
@@ -185,7 +313,7 @@ export function PhasionAIPanel() {
           {/* Header */}
           <div className="h-[76px] bg-[var(--color-espresso)] flex items-center justify-between px-6 flex-shrink-0">
             <div className="flex items-center gap-3">
-              <div className="relative w-9 h-9 rounded-full overflow-hidden bg-white border border-[var(--color-amber)]">
+              <div className="relative w-9 h-9 rounded-circle overflow-hidden bg-white border border-[var(--color-amber)]">
                 <Image src="/logo.png" alt="PhasionAI" fill className="object-contain p-1" />
               </div>
               <div className="flex flex-col">

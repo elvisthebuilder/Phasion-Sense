@@ -9,7 +9,7 @@ export function CheckoutModal() {
   const [deliveryMethod, setDeliveryMethod] = useState("DELIVERY");
 
   if (typeof window !== 'undefined') {
-    (window as any).toggleCheckout = () => setIsOpen(!isOpen);
+    (window as unknown as Record<string, unknown>).toggleCheckout = () => setIsOpen(!isOpen);
   }
 
   if (!isOpen) return null;

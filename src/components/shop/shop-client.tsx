@@ -16,7 +16,6 @@ type Props = {
 };
 
 export function ShopClient({ initialItems }: Props) {
-  const [items, setItems] = useState<ItemResponse[]>(initialItems);
   const [activeCategory, setActiveCategory] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);

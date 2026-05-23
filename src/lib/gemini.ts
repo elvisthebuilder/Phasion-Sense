@@ -29,19 +29,16 @@ export async function callGemini(
   const model = config.geminiModel || "gemini-2.5-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-  const payload: any = {
+  const payload = {
     contents,
     systemInstruction: {
       parts: [{ text: systemPrompt }],
     },
     generationConfig: {
       temperature: 0.2,
+      responseMimeType: jsonMode ? "application/json" : undefined,
     },
   };
-
-  if (jsonMode) {
-    payload.generationConfig.responseMimeType = "application/json";
-  }
 
   try {
     const res = await fetch(url, {
@@ -65,7 +62,7 @@ export async function callGemini(
     }
 
     return candidateText;
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error calling Gemini API:", error);
     // If gemini-2.5-flash fails because it's not available in the region, try falling back to gemini-2.0-flash
     if (model === "gemini-2.5-flash") {

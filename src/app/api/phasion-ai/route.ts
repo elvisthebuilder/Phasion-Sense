@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getMerchantItems } from "@/lib/commerce";
 import { callGemini } from "@/lib/gemini";
-import { buildChatPrompt, buildSearchPrompt, buildCompleteTheLookPrompt } from "@/lib/prompts";
+import { buildChatPrompt, buildSearchPrompt, buildCompleteTheLookPrompt, buildShopperReactionPrompt } from "@/lib/prompts";
 
 export async function POST(req: Request) {
   try {
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       }
       
       const systemPrompt = buildChatPrompt(catalog);
-      const geminiMessages = messages.map((m: any) => ({
+      const geminiMessages = messages.map((m: { role: string; content: string }) => ({
         role: m.role === "user" ? ("user" as const) : ("model" as const),
         content: m.content
       }));
@@ -89,9 +89,22 @@ export async function POST(req: Request) {
       }
     }
 
+    if (feature === "shopper-reaction") {
+      if (!currentProduct) {
+        return NextResponse.json({ error: "Missing currentProduct" }, { status: 400 });
+      }
+
+      const systemPrompt = buildShopperReactionPrompt(catalog, currentProduct);
+      const userMessage = [{ role: "user" as const, content: `Context: User navigated to product ${currentProduct.name}` }];
+      const responseText = await callGemini(systemPrompt, userMessage, false);
+
+      return NextResponse.json({ reply: responseText });
+    }
+
     return NextResponse.json({ error: "Unsupported feature" }, { status: 400 });
-  } catch (error: any) {
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
     console.error("Error in PhasionAI API route:", error);
-    return NextResponse.json({ error: error.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
