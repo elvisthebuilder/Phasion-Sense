@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -11,15 +11,20 @@ import type { ItemResponse } from "@/lib/commerce";
 
 type Props = {
   item: ItemResponse;
-  completeTheLook: ItemResponse[];
+  fallbackCompleteTheLook: ItemResponse[];
   youMayAlsoLike: ItemResponse[];
 };
 
-export function ProductDetailClient({ item, completeTheLook, youMayAlsoLike }: Props) {
+export function ProductDetailClient({ item, fallbackCompleteTheLook, youMayAlsoLike }: Props) {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [expandedSection, setExpandedSection] = useState<string | null>("DETAILS");
   const [activeImage, setActiveImage] = useState(0);
   const addItem = useCartStore((s) => s.addItem);
+
+  // AI-powered Complete The Look states
+  const [completeTheLook, setCompleteTheLook] = useState<ItemResponse[]>(fallbackCompleteTheLook);
+  const [aiReasoning, setAiReasoning] = useState<string | null>(null);
+  const [isLoadingAi, setIsLoadingAi] = useState(true);
 
   const images = (item.image_urls ?? []).map((url) => resolveApiImageUrl(url)).filter(Boolean) as string[];
 
@@ -30,6 +35,56 @@ export function ProductDetailClient({ item, completeTheLook, youMayAlsoLike }: P
   const handleAddToCart = () => {
     addItem(item, 1, selectedSize ?? "One size");
   };
+
+  // Load Gemini-curated look on mount/change
+  useEffect(() => {
+    let active = true;
+    setIsLoadingAi(true);
+    setAiReasoning(null);
+    // Instantly reset to fallback on item change so the user doesn't see old items
+    setCompleteTheLook(fallbackCompleteTheLook);
+
+    const fetchAiCuration = async () => {
+      try {
+        const res = await fetch("/api/phasion-ai", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            feature: "complete-the-look",
+            currentProduct: item,
+          }),
+        });
+
+        if (!res.ok) {
+          throw new Error(`Curation error: ${res.status}`);
+        }
+
+        const data = await res.json();
+        
+        if (active) {
+          if (data.products && data.products.length > 0) {
+            setCompleteTheLook(data.products);
+            setAiReasoning(data.reasoning);
+          }
+        }
+      } catch (err) {
+        console.error("Error getting Complete The Look recommendations:", err);
+        // Fail gracefully, keeping the standard fallbackCompleteTheLook
+      } finally {
+        if (active) {
+          setIsLoadingAi(false);
+        }
+      }
+    };
+
+    fetchAiCuration();
+
+    return () => {
+      active = false;
+    };
+  }, [item.id, fallbackCompleteTheLook]);
 
   return (
     <div className="flex flex-col min-h-screen pt-[100px] bg-[var(--color-cream)]">
@@ -170,13 +225,35 @@ export function ProductDetailClient({ item, completeTheLook, youMayAlsoLike }: P
       {/* COMPLETE THE LOOK */}
       {completeTheLook.length > 0 && (
         <section className="w-full bg-[var(--color-cream)] py-24 border-t border-[var(--color-parchment)] overflow-hidden">
-          <div className="max-w-[1600px] mx-auto px-8 mb-12 flex items-end justify-between">
+          <div className="max-w-[1600px] mx-auto px-8 mb-10 flex items-end justify-between">
             <div>
-              <h3 className="font-sans text-[var(--color-stone)] uppercase tracking-widest text-sm mb-2">COMPLETE THE LOOK</h3>
-              <p className="font-serif italic text-[var(--color-espresso)] text-2xl">Styled with this piece.</p>
+              <div className="flex items-center gap-3">
+                <h3 className="font-sans text-[var(--color-stone)] uppercase tracking-widest text-sm">COMPLETE THE LOOK</h3>
+                {isLoadingAi ? (
+                  <span className="flex items-center gap-1.5 font-sans text-[10px] text-[var(--color-amber)] uppercase tracking-widest font-bold">
+                    <span className="w-1.5 h-1.5 bg-[var(--color-amber)] rounded-full animate-ping" />
+                    Styling by PhasionAI...
+                  </span>
+                ) : (
+                  <span className="font-sans text-[10px] text-green-600 uppercase tracking-widest font-bold flex items-center gap-1">
+                    ✓ AI Styled
+                  </span>
+                )}
+              </div>
+              <p className="font-serif italic text-[var(--color-espresso)] text-2xl mt-1">Complementary styling suggestions.</p>
             </div>
           </div>
           
+          {/* AI Styling Reasoning Note */}
+          {aiReasoning && (
+            <div className="max-w-[1600px] mx-auto px-8 mb-10">
+              <div className="max-w-[800px] bg-white border-l-2 border-[var(--color-amber)] p-5 shadow-sm">
+                <span className="font-sans text-[9px] tracking-widest uppercase font-bold text-[var(--color-amber)] block mb-1">Stylist Curation Note</span>
+                <p className="font-serif italic text-sm text-[var(--color-espresso)] leading-relaxed">"{aiReasoning}"</p>
+              </div>
+            </div>
+          )}
+
           {/* Horizontal scroll row */}
           <div className="max-w-[1600px] mx-auto px-8 flex gap-8 overflow-x-auto pb-8 snap-x">
             {completeTheLook.map((rec) => {

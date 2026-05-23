@@ -19,15 +19,18 @@ export default async function ProductDetailPage({ params }: Props) {
     notFound();
   }
 
-  const completeTheLook = pickCompleteTheLook(item, catalog);
+  // Pre-calculate fallback recommendation on server for fast initial loading
+  const fallbackCompleteTheLook = pickCompleteTheLook(item, catalog);
+  
+  // Exclude current item and fallback items from "you may also like"
   const youMayAlsoLike = catalog
-    .filter((c) => c.id !== item.id && !completeTheLook.some((r) => r.id === c.id))
+    .filter((c) => c.id !== item.id && !fallbackCompleteTheLook.some((r) => r.id === c.id))
     .slice(0, 4);
 
   return (
     <ProductDetailClient
       item={item}
-      completeTheLook={completeTheLook}
+      fallbackCompleteTheLook={fallbackCompleteTheLook}
       youMayAlsoLike={youMayAlsoLike}
     />
   );
