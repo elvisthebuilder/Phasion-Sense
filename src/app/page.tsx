@@ -64,23 +64,28 @@ export default async function Home() {
       </section>
 
       {/* SECTION 2 — CAMPAIGN DROP BAND */}
-      <section className="w-full bg-[var(--color-onyx)] h-[108px] flex items-center justify-between px-8 text-[var(--color-ivory)] border-y border-[var(--color-espresso)] hidden md:flex">
-        <div className="flex-1">
-          <h2 className="font-serif text-3xl">
-            The Noir Drop — <span className="italic text-[var(--color-amber)]">SS26</span>
-          </h2>
-        </div>
-        
-        <div className="flex-1">
-          <Countdown />
-        </div>
+      {campaigns[0] && (
+        <section className="w-full bg-[var(--color-onyx)] h-[108px] hidden md:flex items-center justify-between px-8 text-[var(--color-ivory)] border-y border-[var(--color-espresso)]">
+          <div className="flex-1">
+            <h2 className="font-serif text-3xl">
+              {campaigns[0].title} — <span className="italic text-[var(--color-amber)]">DROP</span>
+            </h2>
+          </div>
+          
+          <div className="flex-1">
+            <Countdown />
+          </div>
 
-        <div className="flex-1 flex justify-end">
-          <Link href="/campaigns/noir">
-            <Button variant="ghost" className="pr-0">View Drop →</Button>
-          </Link>
-        </div>
-      </section>
+          <div className="flex-1 flex justify-end gap-6 items-center">
+            <Link href="/campaigns">
+              <Button variant="ghost" className="pr-0 font-sans uppercase tracking-widest text-xs">All Campaigns</Button>
+            </Link>
+            <Link href={`/campaigns/${campaigns[0].id}`}>
+              <Button variant="ghost" className="pr-0 font-sans uppercase tracking-widest text-xs text-[var(--color-amber)]">View Drop →</Button>
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* SECTION 3 — NEW ARRIVALS */}
       <section className="w-full max-w-[1600px] mx-auto px-8 py-24">
@@ -197,25 +202,56 @@ export default async function Home() {
       </section>
 
       {/* SECTION 7 — FEATURED CAMPAIGN EDITORIAL */}
-      <section className="w-full flex flex-col lg:flex-row border-y border-[var(--color-parchment)]">
-        <div className="w-full lg:w-1/2 relative h-[600px] lg:h-[800px] bg-[var(--color-parchment)]">
-          {campaignDropImage && <Image src={campaignDropImage} alt="The Noir Drop" fill className="object-cover" />}
-        </div>
-        <div className="w-full lg:w-1/2 bg-[var(--color-cream)] flex flex-col justify-center px-12 py-24 lg:p-32">
-          <span className="font-sans text-[var(--color-stone)] uppercase tracking-widest text-sm mb-6">CAMPAIGN</span>
-          <h2 className="font-serif text-[var(--color-espresso)] font-bold text-5xl lg:text-7xl mb-4">The Noir Drop.</h2>
-          <p className="font-serif italic text-[var(--color-stone)] text-2xl lg:text-3xl mb-8">Darkness, refined.</p>
-          <p className="font-sans text-[var(--color-stone)] text-lg leading-relaxed mb-12 max-w-md">
-            A meticulous exploration of texture in absence of color. The Noir Drop focuses entirely on silhouette, structure, and the subtle interplay of matte and gloss.
-          </p>
-          <div>
-            <Link href="/campaigns/noir">
-              <Button variant="default" className="mb-4">SHOP THE DROP</Button>
-            </Link>
-            <p className="font-sans text-[var(--color-stone)] text-sm tracking-wide">Limited. 47 pieces remaining.</p>
+      {campaigns[0] ? (
+        <section className="w-full flex flex-col lg:flex-row border-y border-[var(--color-parchment)]">
+          <div className="w-full lg:w-1/2 relative h-[600px] lg:h-[800px] bg-[var(--color-parchment)] overflow-hidden group">
+            {campaignDropImage && (
+              <Image
+                src={campaignDropImage}
+                alt={campaigns[0].title}
+                fill
+                sizes="50vw"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+            )}
           </div>
-        </div>
-      </section>
+          <div className="w-full lg:w-1/2 bg-[var(--color-cream)] flex flex-col justify-center px-12 py-24 lg:p-32">
+            <span className="font-sans text-[var(--color-stone)] uppercase tracking-widest text-sm mb-6">FEATURED CAMPAIGN</span>
+            <h2 className="font-serif text-[var(--color-espresso)] font-bold text-5xl lg:text-7xl mb-4 leading-tight">
+              {campaigns[0].title}
+            </h2>
+            {campaigns[0].copy_text && (
+              <p className="font-sans text-[var(--color-stone)] text-lg leading-relaxed mb-12 max-w-md">
+                {campaigns[0].copy_text}
+              </p>
+            )}
+            <div className="flex flex-col gap-4">
+              <Link href={`/campaigns/${campaigns[0].id}`}>
+                <Button variant="default" className="w-fit font-sans uppercase tracking-widest">SHOP THE DROP</Button>
+              </Link>
+              <Link href="/campaigns">
+                <Button variant="ghost" className="w-fit pl-0 font-sans uppercase tracking-widest text-xs">View All Campaigns →</Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section className="w-full flex flex-col lg:flex-row border-y border-[var(--color-parchment)]">
+          <div className="w-full lg:w-1/2 relative h-[600px] lg:h-[800px] bg-[var(--color-parchment)]">
+            {campaignDropImage && <Image src={campaignDropImage} alt="Campaign" fill sizes="50vw" className="object-cover" />}
+          </div>
+          <div className="w-full lg:w-1/2 bg-[var(--color-cream)] flex flex-col justify-center px-12 py-24 lg:p-32">
+            <span className="font-sans text-[var(--color-stone)] uppercase tracking-widest text-sm mb-6">CAMPAIGN</span>
+            <h2 className="font-serif text-[var(--color-espresso)] font-bold text-5xl lg:text-7xl mb-4">Coming Soon.</h2>
+            <p className="font-sans text-[var(--color-stone)] text-lg leading-relaxed mb-12 max-w-md">
+              Something new is in the works. Stay close.
+            </p>
+            <Link href="/campaigns">
+              <Button variant="default" className="w-fit font-sans uppercase tracking-widest">VIEW CAMPAIGNS</Button>
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* SECTION 8 — INSTAGRAM / COMMUNITY GRID */}
       <section className="w-full bg-[var(--color-cream)] pt-32 pb-24">
